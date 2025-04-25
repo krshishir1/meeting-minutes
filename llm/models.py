@@ -25,3 +25,7 @@ class TranscriptionResponse(BaseModel):
     summary: Summary
     success: bool
     message: str = "Transcription and Summarization completed successfully"
+
+class S3FileRequest(BaseModel):
+    s3_key: str
+    bucket_name: Optional[str] = None

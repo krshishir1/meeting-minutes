@@ -5,6 +5,8 @@ import tempfile
 import asyncio
 from models import Summary
 from google import genai
+import shutil
+
 from pathlib import Path
 from settings import Settings
 from pipeline import process_audio
@@ -13,6 +15,9 @@ from setup_logging import setup_logging
 logger = setup_logging(__name__)
 
 class TranscriptionService:
+    def __init__(self):
+        self.settings = Settings
+    
     async def transcribe_audio(self, audio_file):
         """Process uploaded audio file and return diarized transcription"""
         try:
@@ -24,19 +29,21 @@ class TranscriptionService:
             with open(temp_audio_path, "wb") as f:
                 f.write(await audio_file.read())
             
-            # Process the audio file using Deepgram
-            transcription_result = process_audio(
-                str(temp_audio_path),
-                Settings.DEEPGRAM_API_KEY
-            )
+            # Use the common processing method
+            result = await self.transcribe_audio_from_path(str(temp_audio_path))
             
             # Clean up temp file
-            os.unlink(temp_audio_path)
-            os.rmdir(temp_dir)
+            try:
+                os.unlink(temp_audio_path)
+                os.rmdir(temp_dir)
+            except Exception as e:
+                logger.warning(f"Error cleaning up: {str(e)}")
             
-            return transcription_result
+            return result
         
         except Exception as e:
+            logger.error(f"Error in transcribe_audio: {str(e)}")
+            
             # Clean up temp files if they exist
             try:
                 if 'temp_audio_path' in locals() and os.path.exists(temp_audio_path):
@@ -51,7 +58,45 @@ class TranscriptionService:
                 "success": False,
                 "message": f"Error during transcription: {str(e)}"
             }
-
+    
+    async def transcribe_audio_from_path(self, audio_path):
+        """Process audio file at specified path and return diarized transcription"""
+        try:
+            logger.info(f"Processing audio file at {audio_path}")
+            
+            # Check if file exists and is readable
+            if not os.path.exists(audio_path):
+                raise FileNotFoundError(f"Audio file not found at {audio_path}")
+                
+            file_size = os.path.getsize(audio_path)
+            logger.info(f"Audio file size: {file_size} bytes")
+            
+            # Check if we have enough disk space
+            free_space = shutil.disk_usage(os.path.dirname(audio_path)).free
+            logger.info(f"Free disk space: {free_space} bytes")
+            
+            # Process the audio file using Deepgram
+            from pipeline import process_audio
+            transcription_result = process_audio(
+                audio_path,
+                self.settings.DEEPGRAM_API_KEY
+            )
+            
+            logger.info(f"Transcription complete with {len(transcription_result)} segments")
+            
+            return {
+                "segments": transcription_result,
+                "success": True
+            }
+        
+        except Exception as e:
+            logger.error(f"Error processing audio file: {str(e)}")
+            
+            return {
+                "segments": [],
+                "success": False,
+                "message": f"Error during transcription: {str(e)}"
+            }
 
 
 class SummaryService:
@@ -101,6 +146,7 @@ class SummaryService:
             },
         )
         
+        
         try:
             # Try to parse the response as JSON
             logger.debug(f"This is response: {response}")
@@ -134,5 +180,4 @@ class SummaryService:
                 "message": "Couldn't extract relevant data"
             }
         
-    
     
