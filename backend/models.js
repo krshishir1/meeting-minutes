@@ -6,7 +6,8 @@ const MeetingSchema = new mongoose.Schema({
   transcriptText: String,
   summary: String,
   decisions: [String],
-  actionItems: [String]
+  actionItems: [String],
+  audioUrl: String,
 });
 
 const ProjectSchema = new mongoose.Schema({
