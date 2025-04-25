@@ -41,17 +41,18 @@ async def transcribe_audio(
     """
     Transcribe audio with speaker diarization and generate summaries
     
-    - **s3_key**: S3 object key for the audio file (.wav, .mp3, etc.)
+    - **audio_s3_key**: S3 object key for the audio file (.wav, .mp3, etc.)
+    - **video_s3_key**: S3 object key for the vdeio file (.mkv, .mp4, etc.)
     - **bucket_name**: (Optional) S3 bucket name (defaults to configured bucket)
     """
     try:
         # Get the file from S3
         bucket = Settings.S3_BUCKET
-        s3_key = file_request.s3_key
+        audio_s3_key = file_request.audio_s3_key
         
         # Validate file extension
         allowed_extensions = {".wav", ".mp3", ".ogg", ".flac", ".m4a"}
-        file_ext = Path(s3_key).suffix.lower()
+        file_ext = Path(audio_s3_key).suffix.lower()
         
         if file_ext not in allowed_extensions:
             raise HTTPException(
@@ -63,22 +64,17 @@ async def transcribe_audio(
         temp_dir = tempfile.mkdtemp()
         temp_audio_path = os.path.join(temp_dir, f"{uuid.uuid4()}{file_ext}")
         
-        logger.info(f"Downloading {s3_key} from bucket {bucket} to {temp_audio_path}")
+        logger.info(f"Downloading {audio_s3_key} from bucket {bucket} to {temp_audio_path}")
         
         try:
-
-            
             s3_client = boto3.client(
                 's3',
                 aws_access_key_id=Settings.AWS_ACCESS_KEY_ID,
                 aws_secret_access_key=Settings.AWS_SECRET_ACCESS_KEY,
                 region_name=Settings.AWS_REGION
             )
-
-            s3_client.head_object(Bucket=bucket, Key=s3_key)
-            logger.debug("Object exists!")
             
-            s3_client.download_file(bucket, s3_key, temp_audio_path)
+            s3_client.download_file(bucket, audio_s3_key, temp_audio_path)
             logger.info(f"Successfully downloaded file from S3")
             
         except Exception as e:
@@ -89,11 +85,19 @@ async def transcribe_audio(
         try:
             # Process the downloaded audio file
             result = await transcribe_service.transcribe_audio_from_path(temp_audio_path)
-            
+        
+
             # Process summarization if transcription was successful
             if result and result.get("success", False):
-                summary = await summary_service.generate_summary(result.get("segments", []))
+                segments = result.get("segments", [])
+                summary = await summary_service.generate_summary(segments)
                 logger.debug(f"Generated summary: {summary}")
+
+                video_result = await summary_service.identify_visual_contexts(
+                    segments, 
+                    file_request.video_s3_key
+                )
+
             else:
                 summary = {
                     "summary": "Transcription failed, no summary available.",
@@ -117,6 +121,7 @@ async def transcribe_audio(
             
             return TranscriptionResponse(
                 segments=result.get("segments", []),
+                visual_moments=video_result.get("visual_moments", []),
                 summary=summary,
                 success=True,
                 message="Transcription and summarization completed successfully"
