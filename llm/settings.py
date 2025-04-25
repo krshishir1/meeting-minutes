@@ -7,4 +7,5 @@ class Settings():
     app_name = "A2T"
     environment = "development"
     DEEPGRAM_API_KEY = os.getenv("DEEPGRAM_API_KEY")
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 

@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, UploadFile, File, Depends, HTTPException, Form, responses
 from models import TranscriptionResponse
-from services import TranscriptionService
+from services import TranscriptionService, SummaryService
 
 from fastapi.middleware.cors import CORSMiddleware
 from settings import Settings
@@ -27,13 +27,13 @@ app.add_middleware(
 @app.post("/transcribe", response_model=TranscriptionResponse)
 async def transcribe_audio(
     audio_file: UploadFile = File(...),
-    service: TranscriptionService = Depends(lambda: TranscriptionService()),
+    transcribe_service: TranscriptionService = Depends(lambda: TranscriptionService()),
+    summary_service: SummaryService = Depends(lambda: SummaryService()),
 ):
     """
-    Transcribe audio with speaker diarization
+    Transcribe audio with speaker diarization and generate summaries + actionable insights
     
     - **audio_file**: Audio file to transcribe (.wav, .mp3, etc.)
-    - **auth_token**: Optional HuggingFace token (will use environment variable if not provided)
     """
     # Validate file type
     allowed_extensions = {".wav", ".mp3", ".ogg", ".flac", ".m4a"}
@@ -46,16 +46,24 @@ async def transcribe_audio(
         )
     
     # Process transcription
-    result = await service.transcribe_audio(audio_file)
+    result = await transcribe_service.transcribe_audio(audio_file)
+
+    # Process summarization
+    summary = await summary_service.generate_summary(result)
 
     logger.debug(f"This is result: {result}") 
-    if not result["success"]:
+    logger.debug(f"This is summary: {summary}")
+    if not result:
         raise HTTPException(
             status_code=500,
             detail=result["message"]
         )
     
-    return result
+    return TranscriptionResponse(
+        segments=result,
+        summary=summary,
+        success=True,
+    )
 
 
 @app.get("/")
