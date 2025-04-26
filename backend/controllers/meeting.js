@@ -3,6 +3,9 @@ const router = express.Router();
 const { ObjectId } = require("mongoose").Types;
 const Project = require("../models");
 
+const { getJsonFromS3, getTranscription } = require("../aws");
+
+
 // Create a new meeting
 // POST /api/meetings
 router.post("/", async (req, res) => {
@@ -35,12 +38,26 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.post("/transcribe", async (req, res) => {
+  try {
+
+    const { inputKey } = req.body;
+
+    const transcription = await getTranscription(inputKey);
+    return res.status(200).json({ transcription })
+
+  } catch(err) {
+    console.log(err.message)
+    res.status(500).json({ message: err.message})
+  }
+})
+
 router.patch("/", async (req, res) => {
     try {
 
-        const {projectId, meetingId, updatedData} = req.body;
+        const {projectName, meetingId, updatedData} = req.body;
 
-        const project = await Project.findById(projectId);
+        const project = await Project.findOne({name: projectName});
         if(!project) {
             throw new Error("Project not found")
         }
@@ -56,5 +73,35 @@ router.patch("/", async (req, res) => {
         res.status(500).json({ message: err.message})
     }
 })
+
+
+
+router.get("/:id", async (req, res) => {
+  try {
+
+    const { id } = req.params;
+    let projectName = id.split("_")[0];
+    let meetingId = id.split("_")[1];
+
+    const project = await Project.findOne({name: projectName});
+    if(!project) {
+      throw new Error("Project not found")
+    }
+
+    const meeting = project.meetings.id(meetingId);
+    if(!meeting) {
+      throw new Error("Meeting not found")
+    }
+
+    const jsonData = await getJsonFromS3(meeting.dataPath);
+    return res.status(200).json({ report: jsonData})
+
+  } catch(err) {
+    console.log(err.message)
+    res.status(500).json({ message: err.message})
+  }
+} )
+
+
 
 module.exports = router;

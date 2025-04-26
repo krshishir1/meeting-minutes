@@ -4,7 +4,7 @@ import uuid
 import tempfile
 import asyncio
 from models import Summary
-from google import genai
+from google.generativeai import genai
 from pathlib import Path
 from settings import Settings
 from pipeline import process_audio

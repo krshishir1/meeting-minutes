@@ -3,11 +3,9 @@ const mongoose = require("mongoose");
 const MeetingSchema = new mongoose.Schema({
   title: { type: String, required: true },
   date: { type: Date, default: Date.now },
-  transcriptText: String,
-  summary: String,
-  decisions: [String],
-  actionItems: [String],
   audioUrl: String,
+  videoUrl: String,
+  dataPath: String,
 });
 
 const ProjectSchema = new mongoose.Schema({
@@ -18,3 +16,20 @@ const ProjectSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model("Project", ProjectSchema);
+
+
+// summary: String,
+//   decisions: [String],
+//   action_items: [String],
+//   relevant_links: {
+//     type: [mongoose.Schema.Types.Mixed],
+//     default: []
+//   },
+//   visual_moments: {
+//     type: [mongoose.Schema.Types.Mixed],
+//     default: []
+//   },
+//   segments: {
+//     type: [mongoose.Schema.Types.Mixed],
+//     default: []
+//   },
