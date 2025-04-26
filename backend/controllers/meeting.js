@@ -79,6 +79,8 @@ router.patch("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
 
+    console.log(req.params)
+
     const { id } = req.params;
     let projectName = id.split("_")[0];
     let meetingId = id.split("_")[1];

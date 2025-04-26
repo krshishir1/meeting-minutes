@@ -48,7 +48,7 @@ const MeetingRecorder = () => {
     }
 
     if (projectId) {
-      //   fetchProject();
+        fetchProject();
     }
   }, [projectId]);
 
@@ -65,13 +65,49 @@ const MeetingRecorder = () => {
     fetchProject();
   }, []);
 
+  useEffect(() => {
+    chrome.storage.local.get(["status"], (result) => {
+      console.log("Status: ", result.status);
+
+      if(result.status == "started") {
+        setIsRecording(true);
+        setStatus("PAUSE");
+      }
+    });
+
+    chrome.storage.local.get(["recorder"], (result) => {
+      console.log("Recorder: ", result.recorder);
+
+      if(result.recorder) {
+        setMediaRecorder(result.recorder);
+        console.log("Media recorder: ", result.recorder);
+      }
+    });
+  }, []);
+
   const handleStartPause = async () => {
     if (status == "START") {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: true,
-      });
-      const recorder = new MediaRecorder(stream);
+    //   const stream = await navigator.mediaDevices.getUserMedia({
+    //     audio: true,
+    //     video: true,
+    //   });
+    //   const streamId = await chrome.tabCapture.getMediaStreamId()
+    //   const stream = await navigator.mediaDevices.getUserMedia({
+    //     audio: {
+    //       mandatory: {
+    //         chromeMediaSource: "tab",
+    //         chromeMediaSourceId: streamId,
+    //       },
+    //     },
+    //     video: {
+    //       mandatory: {
+    //         chromeMediaSource: "tab",
+    //         chromeMediaSourceId: streamId,
+    //       },
+    //     },
+    //   }) 
+      const stream =await navigator.mediaDevices.getDisplayMedia({ audio: true, video: true })
+      const recorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs=vp8,opus' });
 
       recorder.ondataavailable = (e) => {
         chunksRef.current.push(e.data);
@@ -88,8 +124,13 @@ const MeetingRecorder = () => {
       setStatus("PAUSE");
       setIsRecording(true);
 
+      chrome.storage.local.set({ status: "started", recorder: recorder }, () => {
+        console.log("Saving credentials ");
+      });
+
       intervalRef.current = setInterval(() => {
         setRecordingTime((prev) => prev + 1);
+        console.log("Recording time: ", recordingTime);
       }, 1000);
     }
 
@@ -192,7 +233,12 @@ const MeetingRecorder = () => {
   return (
     <div className="p-6 max-w-xl mx-auto bg-white rounded-lg shadow-lg">
       <button
-        onClick={() => navigate("/")}
+        onClick={() => {
+            navigate("/");
+            chrome.storage.local.remove(["status", "projectId", "projectName"], () => {
+                console.log("Removed status and projectId");
+            })
+        }}
         className="border cursor-pointer border-neutral-50 px-2 py-1 rounded-md flex items-center gap-2 text-sm"
       >
         <IoIosArrowBack size={28} />

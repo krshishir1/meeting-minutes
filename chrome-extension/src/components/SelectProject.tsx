@@ -7,7 +7,6 @@ export default function SelectProjectPage() {
 
   const navigate = useNavigate();
 
-
   useEffect(() => {
     async function fetchProjects() {
       const response = await fetch("http://localhost:4000/api/projects");
@@ -24,6 +23,17 @@ export default function SelectProjectPage() {
     }
 
     fetchProjects();
+  }, []);
+
+  useEffect(() => {
+    chrome.storage.local.get(["projectId"], (result) => {
+      console.log("Value currently is", result.projectId);
+
+      if(result.projectId) {
+        // setCurrentProjectId(result.projectId);
+        navigate(`/project/${result.projectId}`);
+      }
+    });
   }, []);
 
   return (
@@ -53,7 +63,12 @@ export default function SelectProjectPage() {
             <div
               key={project._id}
               className="relative flex justify-between items-center bg-white p-6 rounded-lg shadow border border-neutral-100 transition transform group hover:scale-102 hover:shadow-md cursor-pointer"
-              onClick={() => navigate(`/project/${project._id}`)}
+              onClick={() => {
+                navigate(`/project/${project._id}`);
+                chrome.storage.local.set({ projectId: project._id, projectName: project.name }, () => {
+                  console.log("ProjectId is set: ", project._id);
+                });
+              }}
             >
               <div className="mb-4">
                 <h3 className="text-xl font-semibold text-gray-800">
