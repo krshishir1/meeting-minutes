@@ -3,7 +3,7 @@
   "name": "Meeting Notes",
   "version": "0.0.1",
   "description": "A chrome extension for transcribing meetings to get notes",
-  "permissions": ["tabCapture", "activeTab", "storage"],
+  "permissions": ["tabCapture", "activeTab", "downloads"],
   "icons": {
     "48": "icon.png"
   },
