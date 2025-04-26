@@ -77,9 +77,7 @@ def format_deepgram_response(response):
         # Extract utterances with speaker labels
     for utterance in response["results"].get("utterances", []):
         # Get the speaker label
-        logger.debug(f"This is word: {utterance["words"][0]}")
         speaker_id = utterance["words"][0].get("speaker", 0)
-        logger.debug(f"This is speaker_id: {speaker_id}")
         
         speaker_label = f"Speaker {speaker_id}"
         
