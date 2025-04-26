@@ -21,7 +21,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { motion } from "motion/react";
-import { File, Folder, Plus } from "lucide-react";
+import { Folder, Plus } from "lucide-react";
 type Project = {
   _id: number;
   name: string;
@@ -68,44 +68,7 @@ export default function Dashboard() {
     }
   };
 
-  const mockProjects = [
-    {
-      id: 1,
-      title: "Project 1",
-      description: "Description for project 1",
-      meetings: [
-        { id: "1", name: "Meeting 1", type: "audio" },
-        { id: "2", name: "Meeting 2", type: "video" },
-      ],
-    },
-    {
-      id: 2,
-      title: "Project 2",
-      description: "Description for project 2",
-      meetings: [
-        { id: "3", name: "Meeting 3", type: "image" },
-        { id: "4", name: "Meeting 4", type: "document" },
-      ],
-    },
-    {
-      id: 3,
-      title: "Project 1",
-      description: "Description for project 1",
-      meetings: [
-        { id: "1", name: "Meeting 1", type: "audio" },
-        { id: "2", name: "Meeting 2", type: "video" },
-      ],
-    },
-    {
-      id: 4,
-      title: "Project 1",
-      description: "Description for project 1",
-      meetings: [
-        { id: "1", name: "Meeting 1", type: "audio" },
-        { id: "2", name: "Meeting 2", type: "video" },
-      ],
-    },
-  ];
+  
 
   return (
     <>
@@ -230,7 +193,7 @@ export default function Dashboard() {
                         <p className="text-lg font-semibold">{meeting.title}</p>
                         <Button
                           variant="link"
-                          onClick={() => router.push(`/meeting/${meeting._id}`)}
+                          onClick={() => router.push(`/meeting/${project.name}_${meeting._id}`)}
                           className="text-orange-500 hover:text-orange-600"
                         >
                           View
