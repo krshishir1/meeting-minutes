@@ -1,29 +1,14 @@
 
 
 'use client';
-
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { mockProjects } from '@/utils/mockData';
 import Image from 'next/image';
 import Header from '@/components/common/header';
 import {Button} from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookmarkPlus, ScrollText, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
-
-
-type Project = {
-  id: string;
-  name: string;
-  media: {
-    id: string;
-    name: string;
-    type: string;
-  }[];
-};
-
 
 const features = [
   {
@@ -50,16 +35,7 @@ const features = [
 ]
 
 export default function HomePage() {
-
-  const [projects, setProjects] = useState<Project[]>([]);
   const router = useRouter();
-
-  useEffect(() => {
-    setProjects(mockProjects)
-  }, []);
-
-
-
   return (
     <>
       <Header/>
@@ -87,7 +63,7 @@ export default function HomePage() {
       <section className='my-10 px-20 pt-2 pb-10 '>
         <div className='flex flex-col  justify-center gap-2 my-10 '>
         <p className=' text-orange-600'>Get started in seconds!</p>
-        <h1 className='text-3xl font-semibold'>Boost productivity with Briefly's AI Meeting Summary for Google Meet</h1>
+        <h1 className='text-3xl font-semibold'>Boost productivity with Briefly&apos; AI Meeting Summary for Google Meet</h1>
         <p>Simply add the Briefly Chrome Extension and get started</p>
         </div>
         <div className='flex items-center justify-center gap-8 flex-wrap '>
@@ -137,7 +113,7 @@ export default function HomePage() {
     <p className="text-orange-600">In meeting experience</p>
     <h1 className="text-4xl font-semibold">Real-Time Google Meet AI Summaries</h1>
     <p className="text-gray-600">
-      Get instant summaries during your Google Meet sessions. Briefly's AI captures key points and action items, so you stay focused on the conversation.
+      Get instant summaries during your Google Meet sessions. Briefly&apos; AI captures key points and action items, so you stay focused on the conversation.
     </p>
     <Button className="w-fit p-4 my-6 bg-white text-black border">Add to Chrome for free</Button>
   </motion.div>

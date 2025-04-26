@@ -4,59 +4,59 @@
 import { useEffect, useState } from "react";
 import { MeetingTranscript } from "@/components/common/meetingTranscript";
 import { MeetingSummary } from './../../../components/common/meetingSummary';
-import { mockDataForSummary } from "@/utils/mockData"; 
 import Header from "@/components/common/header";
 import { Button } from "@/components/ui/button";
 import Images from "@/components/common/Images";
 import { AudioLines, GalleryHorizontal, Text } from "lucide-react";
 import axios from "axios";
 import { useParams } from "next/navigation";
-
-export interface Meeting {
-    _id: string;
-    title: string;
-    date: string;
-    transcriptText?: string;
-    summary?: string;
-    decisions?: string[];
-    actionItems?: string[];
-    audioUrl?: string;
-  }
-  
+import { MeetingReport } from "@/utils/types";
 
 
 export default function MeetingPage() {
   const [view, setView] = useState<"summary" | "transcript" | "image">("summary");
-
-  const { id: meetingId } = useParams();
-  const [meeting, setMeeting] = useState(null);
-
+  const [report, setReport] = useState<MeetingReport | null>(null);
+  const [error, setError] = useState("");
+  const params = useParams() as { id: string };
   useEffect(() => {
-    const fetchMeeting = async () => {
+    const fetchMeetingData = async () => {
       try {
-        const res = await axios.get("http://localhost:4000/api/meetings/"+meetingId);
-        const projects = res.data.projects;
-
-        for (const project of projects) {
-            const found = project.meetings.find((m: Meeting) => m._id === meetingId);
-            if (found) {
-              setMeeting(found);
-              break;
-            }
-          }
-          
-
-        if (!meeting) console.warn("Meeting not found");
-
+        console.log("running")
+        const response = await axios.get(
+          `http://localhost:4000/api/meetings/${params.id}`
+        );
+        setReport(response.data.report);
+        
       } catch (err) {
-        console.error("Error fetching meeting:", err);
-      }
+  if (err instanceof Error) {
+    setError(err.message);
+  } else {
+    setError("Failed to fetch meeting");
+  }
+}
     };
 
-    fetchMeeting();
-  }, [meetingId]);
+    console.log(params)
+
+    if (params?.id) {
+      fetchMeetingData();
+    }
+  }, [params]);
+//   const data =  meeting;
+  if(error){
+    return(
+        <div>failed to fetch transcript</div>
+    )
+  }
+ 
 // meeting ||
-  const data =  mockDataForSummary;
+const result = report?.results || {
+    summary: "",
+    decisions: [],
+    action_items: [],
+    relevant_links: []
+  };
+  
   return (
     <>
     <Header/>
@@ -88,13 +88,9 @@ export default function MeetingPage() {
         </Button>
       </div>
 
-      {view === "summary" ? (
-        <MeetingSummary summary={data.summary} />
-      ) : view=="transcript"?(
-        <MeetingTranscript data={data} />
-      ):(
-        <Images data={data.visual_moments}/>
-      )}
+      {view === "summary" && <MeetingSummary result={result} />}
+    {view === "transcript" && report && <MeetingTranscript data={report} />}
+        {view === "image" && <div>{report && <Images data={report} />}</div>}
     </div>
     </>
   );

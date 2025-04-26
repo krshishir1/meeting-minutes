@@ -38,7 +38,7 @@ export default function SelectProjectPage() {
             No Projects Available
           </h2>
           <p className="text-lg text-gray-600 mb-6">
-            It looks like you don't have any projects yet. Let's get started!
+            It looks like you don't have any projects yet. Let&apos; get started!
           </p>
           <button
             className="bg-blue-800 text-white text-lg px-6 py-3 rounded-md shadow-md hover:bg-blue-900 transition duration-300"
