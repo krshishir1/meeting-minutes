@@ -11,6 +11,7 @@ import { AudioLines, GalleryHorizontal, Text } from "lucide-react";
 import axios from "axios";
 import { useParams } from "next/navigation";
 import { MeetingReport } from "@/utils/types";
+import { mockDataForSummary } from "@/utils/mockData";
 
 
 export default function MeetingPage() {
@@ -18,6 +19,7 @@ export default function MeetingPage() {
   const [report, setReport] = useState<MeetingReport | null>(null);
   const [error, setError] = useState("");
   const params = useParams() as { id: string };
+
   useEffect(() => {
     const fetchMeetingData = async () => {
       try {
@@ -42,12 +44,14 @@ export default function MeetingPage() {
       fetchMeetingData();
     }
   }, [params]);
-//   const data =  meeting;
-  if(error){
-    return(
-        <div>failed to fetch transcript</div>
-    )
-  }
+
+  const data =  mockDataForSummary;
+  const resultNew = mockDataForSummary
+//   if(error){
+//     return(
+//         <div>failed to fetch transcript</div>
+//     )
+//   }
  
 // meeting ||
 const result = report?.results || {
@@ -88,9 +92,9 @@ const result = report?.results || {
         </Button>
       </div>
 
-      {view === "summary" && <MeetingSummary result={result} />}
-    {view === "transcript" && report && <MeetingTranscript data={report} />}
-        {view === "image" && <div>{report && <Images data={report} />}</div>}
+    {view === "summary" && <MeetingSummary result={data.summary} />}
+    {view === "transcript"  && <MeetingTranscript data={data} />}
+        {view === "image" && <Images data={data} />}
     </div>
     </>
   );

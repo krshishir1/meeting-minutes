@@ -1,7 +1,6 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import Link from "next/link";
-import {MeetingResult} from "@/utils/types";
 import {
   ExternalLink,
   Flag,
@@ -18,11 +17,9 @@ import {
     URL: string;
     description: string;
   };
-  type MeetingSummaryProps = {
-    result: MeetingResult;
-  };
+  
 
-export function MeetingSummary({ result }: MeetingSummaryProps) {
+export function MeetingSummary({ result }: any) {
   return (
     <div className="space-y-8">
       <section>

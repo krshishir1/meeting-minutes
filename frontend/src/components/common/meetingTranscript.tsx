@@ -35,8 +35,8 @@ function getInitials(name: string) {
   return (names[0][0] + names[names.length - 1][0]).toUpperCase();
 }
 
-export function MeetingTranscript({ data }: Props) {
-  const segments = data?.segments || []; // Ensure segments is always an array
+export function MeetingTranscript({ data }: any) {
+  const segments = data.segments || []; // Ensure segments is always an array
 
 
   return (
@@ -48,7 +48,7 @@ export function MeetingTranscript({ data }: Props) {
           </h2>
           <div className="px-12 py-4">
             {segments.length > 0 ? (
-              segments.map((seg: TranscriptSegment, idx: number) => (
+              segments.map((seg: any, idx: number) => (
                 <div key={idx} className="px-4 py-2 mb-2">
                   <div className="font-semibold flex justify-between items-center mb-2">
                     <div className="flex gap-2 items-center">

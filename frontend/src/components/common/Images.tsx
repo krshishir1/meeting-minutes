@@ -1,14 +1,13 @@
 "use client";
 import Image from "next/image";
-import { VisualMoment } from "@/utils/types";
 
-export default function Images({ data }: { data: { visual_moments: VisualMoment[] } }) {
+export default function Images({ data }: { data: any }) {
     const dataImg = data.visual_moments;
   return (
     <>
       {dataImg.length > 0 ? (
         <div>
-            {dataImg.map((item: VisualMoment, index: number) => (
+            {dataImg.map((item: any, index: number) => (
             <div
               key={index}
               className="flex items-center justify-between mb-6 p-6 border rounded-lg shadow-md bg-white hover:shadow-xl transition-shadow duration-300"
